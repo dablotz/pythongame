@@ -4,6 +4,6 @@
 Simple platformer designed with the help of my kiddo
 
 Goals of the project: 
-Learning pygame
-Working alongside Copilot
-CI set up for the repo
+*Learning pygame
+*Working alongside Copilot
+*CI set up for the repo

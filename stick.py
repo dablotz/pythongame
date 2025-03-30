@@ -1,6 +1,9 @@
+""" Draw a stick figure. """
+
 import pygame
 
 def draw_stick_figure(screen, rect, color=(0, 0, 0)):
+    """ Draw a stick figure at the given rectangle position. """
     # Head
     head_radius = rect.width // 4
     head_center = (rect.centerx, rect.top + head_radius)

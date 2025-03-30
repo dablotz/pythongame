@@ -1,5 +1,9 @@
-import pygame
+""" game.py
+This module contains the main game loop and handles the game state, player, boss, and hazards.
+"""
+
 import sys
+import pygame
 from player import Player
 from boss import BossEnemy
 from hazard import Hazard
@@ -8,7 +12,7 @@ from game_state import GameState
 from stick import draw_stick_figure
 
 # Initialize Pygame
-pygame.init()
+pygame.init() # pylint: disable=no-member
 
 # Game settings
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -47,14 +51,14 @@ hazards = [Hazard(400, SCREEN_HEIGHT - 60, 40, 20)]
 game_state = GameState()
 
 # Game loop
-running = True
-while running:
+RUNNING = True
+while RUNNING:
     clock.tick(FPS)
     screen.fill(SKY_BLUE)
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        if event.type == pygame.QUIT: # pylint: disable=no-member
+            RUNNING = False
 
     keys = pygame.key.get_pressed()
     player.update(keys)
@@ -103,18 +107,20 @@ while running:
     # Draw health bars
     pygame.draw.rect(screen, GREEN, (20, 20, game_state.player_health * 30, 20))
     pygame.draw.rect(screen, WHITE, (20, 20, 90, 20), 2)
-    pygame.draw.rect(screen, RED, (SCREEN_WIDTH - 150, 20, game_state.boss_health * 30, 20))
+    pygame.draw.rect(
+        screen, RED, (SCREEN_WIDTH - 150, 20, game_state.boss_health * 30, 20)
+    )
     pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - 150, 20, 150, 20), 2)
 
     # End game if over or complete
     if game_state.game_over:
         print("Game Over")
-        running = False
+        RUNNING = False
     elif game_state.level_complete:
         print("You Win!")
-        running = False
+        RUNNING = False
 
     pygame.display.flip()
 
-pygame.quit()
+pygame.quit() # pylint: disable=no-member
 sys.exit()

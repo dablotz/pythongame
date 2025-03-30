@@ -15,7 +15,7 @@ from stick import draw_stick_figure
 pygame.init() # pylint: disable=no-member
 
 # Game settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 1024, 512
 FPS = 60
 GRAVITY = 0.5
 JUMP_STRENGTH = -10
@@ -36,6 +36,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Mini Platformer")
 clock = pygame.time.Clock()
 
+background_img = pygame.image.load("assets/Background.png").convert()
+hazards_img = pygame.image.load("assets/Hazards.png").convert_alpha()
+interactables_img = pygame.image.load("assets/Interactables.png").convert_alpha()
+
 # Platforms
 platforms = [
     pygame.Rect(0, SCREEN_HEIGHT - 40, SCREEN_WIDTH, 40),
@@ -55,6 +59,10 @@ RUNNING = True
 while RUNNING:
     clock.tick(FPS)
     screen.fill(SKY_BLUE)
+
+    screen.blit(background_img, (0, 0))
+    screen.blit(hazards_img, (0, 0))
+    screen.blit(interactables_img, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # pylint: disable=no-member

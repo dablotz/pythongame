@@ -3,7 +3,16 @@
 # pythongame
 Simple platformer designed with the help of my kiddo
 
+Uses:
+- https://github.com/pygame/pygame
+
+Map made with:
+- https://github.com/deepnight/ldtk
+
 Goals of the project: 
 - Learning pygame
+- Learning LDtk
+  - Also game asset management
+  - Tilesets
 - Working alongside Copilot
 - CI set up for the repo

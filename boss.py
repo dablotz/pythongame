@@ -4,7 +4,7 @@ This module contains the BossEnemy class, which represents a boss enemy in the g
 
 import pygame
 
-class BossEnemy:
+class BossEnemy: # pylint: disable=too-few-public-methods
     """ BossEnemy class representing a boss enemy in the game. """
     def __init__(self):
         """ Initialize the boss enemy with default values. """

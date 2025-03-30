@@ -2,7 +2,7 @@
 
 import pygame
 
-class Hazard:
+class Hazard: # pylint: disable=too-few-public-methods
     """ Hazard class representing a hazard in the game. """
     def __init__(self, x, y, w, h):
         """ Initialize the hazard with its position and size. """

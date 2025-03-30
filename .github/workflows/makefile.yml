@@ -14,8 +14,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: configure
-      run: ./configure
+    # Set up python
+    - name: Sets up Python 3.10.16
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.10.16
 
-    - name: Make all steps
-      run: make all
+    - name: Install dependendencies
+      run: |
+        make install
+
+    - name: Lint with pylint
+      run: |
+        make lint
+
+    - name: Run tests
+      run: |
+        make test
+
+    - name: Format code
+      run: |
+        make format

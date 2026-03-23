@@ -3,8 +3,8 @@
 
 import pygame
 import pytest
-from physics import apply_gravity, resolve_platform_collisions
-from settings import GRAVITY
+from game.core.physics import apply_gravity, resolve_platform_collisions
+from game.core.settings import GRAVITY
 
 
 class _Entity:  # pylint: disable=too-few-public-methods

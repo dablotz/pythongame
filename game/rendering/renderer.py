@@ -8,10 +8,10 @@ touching player.py, boss.py, or game.py.
 
 import pygame
 
-from assets import Assets
-from enums import Facing, PlayerState
-from stick import draw_stick_figure
-from settings import (
+from game.rendering.assets import Assets
+from game.core.enums import Facing, PlayerState
+from game.rendering.stick import draw_stick_figure
+from game.core.settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     WHITE,

@@ -12,7 +12,7 @@ import json
 
 import pygame
 
-from hazard import Hazard
+from game.entities.hazard import Hazard
 
 
 class LevelData:  # pylint: disable=too-few-public-methods

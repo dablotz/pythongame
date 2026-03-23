@@ -1,8 +1,8 @@
 """Tests for Player state, facing, and reset."""
 # pylint: disable=missing-function-docstring,redefined-outer-name
 import pytest
-from enums import Facing, PlayerState
-from player import Player
+from game.core.enums import Facing, PlayerState
+from game.entities.player import Player
 
 
 class _Input:  # pylint: disable=too-few-public-methods

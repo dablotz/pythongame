@@ -7,8 +7,8 @@ physics.py — this class only handles player-controlled behaviour.
 
 import pygame
 
-from enums import Facing, PlayerState
-from settings import JUMP_STRENGTH, PLAYER_SPEED
+from game.core.enums import Facing, PlayerState
+from game.core.settings import JUMP_STRENGTH, PLAYER_SPEED
 
 # Seconds the attack hitbox stays active after pressing Z.
 _ATTACK_ACTIVE_DURATION = 0.1
@@ -29,9 +29,9 @@ class Player:  # pylint: disable=too-many-instance-attributes
         self.facing: Facing = Facing.RIGHT
         self._attack_timer: float = 0.0
         self._anim_timer: float = 0.0
+        self._is_moving: bool = False
         self.anim_frame: int = 0  # alternates 0/1 while running
         self.attack_rect = pygame.Rect(0, 0, 0, 0)
-        self._is_moving: bool = False
         # One-frame event flags — read by game.py to trigger sounds.
         self.just_jumped: bool = False
         self.just_attacked: bool = False
@@ -107,6 +107,7 @@ class Player:  # pylint: disable=too-many-instance-attributes
         self.facing = Facing.RIGHT
         self._attack_timer = 0.0
         self._anim_timer = 0.0
+        self._is_moving = False
         self.anim_frame = 0
         self.attack_rect = pygame.Rect(0, 0, 0, 0)
         self.just_jumped = False

@@ -17,7 +17,7 @@ install:
 
 lint:
 	@echo "Running linters..."
-	@pylint *.py tests/
+	@pylint run.py game/ tests/
 	@echo "Linting completed."
 
 format:

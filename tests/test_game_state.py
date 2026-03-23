@@ -2,7 +2,7 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 import pytest
-from game_state import GameState
+from game.core.game_state import GameState
 
 
 @pytest.fixture

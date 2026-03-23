@@ -9,7 +9,8 @@ Keeping physics separate from entities means:
 """
 
 import pygame
-from settings import GRAVITY
+
+from game.core.settings import GRAVITY
 
 
 def apply_gravity(entity, dt: float) -> None:

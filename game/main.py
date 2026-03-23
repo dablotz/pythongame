@@ -1,6 +1,5 @@
-"""game.py
-Entry point. Initialises pygame, owns the scene state machine, and runs
-the main loop.
+"""main.py
+Initialises pygame, owns the scene state machine, and runs the main loop.
 
 The loop itself is intentionally thin:
   - InputHandler reads raw input once per frame.
@@ -13,17 +12,17 @@ import sys
 
 import pygame  # pylint: disable=no-member
 
-from assets import Assets
-from boss import BossEnemy
-from game_state import GameState
-from input_handler import InputHandler
-from level import LevelData
-from physics import apply_gravity, resolve_platform_collisions
-from player import Player
-from renderer import Renderer
-from scenes import Scene
-from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE
-from sounds import Sounds
+from game.rendering.assets import Assets
+from game.entities.boss import BossEnemy
+from game.core.game_state import GameState
+from game.core.input_handler import InputHandler
+from game.levels.level import LevelData
+from game.core.physics import apply_gravity, resolve_platform_collisions
+from game.entities.player import Player
+from game.rendering.renderer import Renderer
+from game.core.scenes import Scene
+from game.core.settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE
+from game.audio.sounds import Sounds
 
 _LEVEL_PATH = "assets/data.json"
 
@@ -152,7 +151,3 @@ def main() -> None:  # pylint: disable=too-many-branches,too-many-statements
 
     pygame.quit()  # pylint: disable=no-member
     sys.exit()
-
-
-if __name__ == "__main__":
-    main()

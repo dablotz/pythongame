@@ -5,7 +5,7 @@ import os
 import tempfile
 
 import pytest
-from level import LevelData
+from game.levels.level import LevelData
 
 
 @pytest.fixture

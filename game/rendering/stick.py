@@ -8,7 +8,7 @@ with the same arguments, just getting pixel art back instead of lines.
 
 import pygame
 
-from enums import Facing, PlayerState
+from game.core.enums import Facing, PlayerState
 
 
 def draw_stick_figure(  # pylint: disable=too-many-arguments,too-many-positional-arguments

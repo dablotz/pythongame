@@ -1,47 +1,132 @@
-""" 
-This code defines a Player class that represents a player character in a game.
-The player can move left and right, jump, and attack. 
-The player is affected by gravity and has a cooldown for attacks.
+"""player.py
+Player character: movement, jumping, and attacking.
+
+Physics (gravity, platform collision) are applied by the game loop via
+physics.py — this class only handles player-controlled behaviour.
 """
 
 import pygame
 
-class Player:
-    """ Player class representing the player character. """
-    def __init__(self, jump_strength=-10, gravity=0.5):
-        """ Initialize the player with default values. """
-        self.on_ground = True
-        self.rect = pygame.Rect(100, 500, 50, 50)
-        self.vel_y = 0
-        self.attack_cooldown = 0
+from enums import Facing, PlayerState
+from settings import JUMP_STRENGTH, PLAYER_SPEED
+
+# Seconds the attack hitbox stays active after pressing Z.
+_ATTACK_ACTIVE_DURATION = 0.1
+# Total cooldown between attacks in seconds.
+_ATTACK_COOLDOWN = 0.5
+# Running animation alternates leg pose at this interval (seconds).
+_RUN_FRAME_INTERVAL = 0.15
+
+
+class Player:  # pylint: disable=too-many-instance-attributes
+    """The player character."""
+
+    def __init__(self, spawn: tuple[int, int] = (100, 300)) -> None:
+        self._spawn = spawn
+        self.rect = pygame.Rect(spawn[0], spawn[1], 50, 50)
+        self.vel_y: float = 0.0
+        self.on_ground: bool = False
+        self.facing: Facing = Facing.RIGHT
+        self._attack_timer: float = 0.0
+        self._anim_timer: float = 0.0
+        self.anim_frame: int = 0  # alternates 0/1 while running
         self.attack_rect = pygame.Rect(0, 0, 0, 0)
-        self.jump_strength = jump_strength
-        self.gravity = gravity
+        self._is_moving: bool = False
+        # One-frame event flags — read by game.py to trigger sounds.
+        self.just_jumped: bool = False
+        self.just_attacked: bool = False
 
-    def update(self, keys):
-        """ Update the player's position and state based on input keys. """
-        if keys[pygame.K_LEFT]: # pylint: disable=no-member
-            self.rect.x -= 5
-        if keys[pygame.K_RIGHT]: # pylint: disable=no-member
-            self.rect.x += 5
-        if keys[pygame.K_SPACE] and self.on_ground: # pylint: disable=no-member
-            self.vel_y = self.jump_strength
+    # ------------------------------------------------------------------
+    # Public interface
+    # ------------------------------------------------------------------
+
+    @property
+    def is_attacking(self) -> bool:
+        """True during the active hitbox window of an attack."""
+        return self._attack_timer > (_ATTACK_COOLDOWN - _ATTACK_ACTIVE_DURATION)
+
+    @property
+    def state(self) -> PlayerState:
+        """Current animation state for the renderer."""
+        if self.is_attacking:
+            return PlayerState.ATTACKING
+        if not self.on_ground:
+            return PlayerState.JUMPING
+        if self._is_moving:
+            return PlayerState.RUNNING
+        return PlayerState.IDLE
+
+    def update(self, input_handler, dt: float) -> None:
+        """Apply player input. Physics are handled externally by physics.py.
+
+        Args:
+            input_handler: An InputHandler instance for the current frame.
+            dt: Elapsed time in seconds since the last frame.
+        """
+        # Reset one-frame flags.
+        self.just_jumped = False
+        self.just_attacked = False
+
+        self._is_moving = False
+        if input_handler.move_left:
+            self.rect.x -= int(PLAYER_SPEED * dt)
+            self.facing = Facing.LEFT
+            self._is_moving = True
+        if input_handler.move_right:
+            self.rect.x += int(PLAYER_SPEED * dt)
+            self.facing = Facing.RIGHT
+            self._is_moving = True
+
+        # Running animation: cycle anim_frame between 0 and 1.
+        if self._is_moving and self.on_ground:
+            self._anim_timer = (self._anim_timer + dt) % (2 * _RUN_FRAME_INTERVAL)
+            self.anim_frame = int(self._anim_timer >= _RUN_FRAME_INTERVAL)
+        else:
+            self._anim_timer = 0.0
+
+        if input_handler.jump and self.on_ground:
+            self.vel_y = JUMP_STRENGTH
             self.on_ground = False
+            self.just_jumped = True
 
-        # Apply gravity
-        self.vel_y += self.gravity
-        self.rect.y += self.vel_y
+        if input_handler.attack and self._attack_timer <= 0:
+            self._start_attack()
+            self.just_attacked = True
 
-        # Attack
-        if keys[pygame.K_z] and self.attack_cooldown == 0: # pylint: disable=no-member
-            self.attack()
+        if self._attack_timer > 0:
+            self._attack_timer -= dt
+            self._update_attack_rect()
+        else:
+            self._attack_timer = 0
 
-        if self.attack_cooldown > 0:
-            self.attack_cooldown -= 1
+    def reset(self) -> None:
+        """Return the player to spawn position with cleared state."""
+        self.rect.topleft = self._spawn
+        self.vel_y = 0.0
+        self.on_ground = False
+        self.facing = Facing.RIGHT
+        self._attack_timer = 0.0
+        self._anim_timer = 0.0
+        self.anim_frame = 0
+        self.attack_rect = pygame.Rect(0, 0, 0, 0)
+        self.just_jumped = False
+        self.just_attacked = False
 
-    def attack(self):
-        """ Perform an attack. """
-        self.attack_rect = pygame.Rect(
-            self.rect.right, self.rect.top, 20, self.rect.height
-        )
-        self.attack_cooldown = 30
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _start_attack(self) -> None:
+        self._attack_timer = _ATTACK_COOLDOWN
+        self._update_attack_rect()
+
+    def _update_attack_rect(self) -> None:
+        """Position attack hitbox in front of the player based on facing."""
+        if self.facing == Facing.RIGHT:
+            self.attack_rect = pygame.Rect(
+                self.rect.right, self.rect.top, 20, self.rect.height
+            )
+        else:
+            self.attack_rect = pygame.Rect(
+                self.rect.left - 20, self.rect.top, 20, self.rect.height
+            )

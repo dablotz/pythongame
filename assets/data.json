@@ -7,11 +7,22 @@
 	"height": 512,
 	"bgColor": "#1B94E7",
 	"neighbourLevels": [],
-	"customFields" : {},
+	"customFields": {},
 	"layers": [
 		"Background.png",
 		"Hazards.png",
 		"Interactables.png"
 	],
-	"entities" : {}
+	"platforms": [
+		{ "x": 0,   "y": 472, "w": 1024, "h": 40 },
+		{ "x": 300, "y": 380, "w": 200,  "h": 20 },
+		{ "x": 150, "y": 280, "w": 100,  "h": 20 }
+	],
+	"hazards": [
+		{ "x": 400, "y": 452, "w": 40, "h": 20 }
+	],
+	"entities": {
+		"player_spawn": { "x": 100, "y": 300 },
+		"boss_spawn":   { "x": 600, "y": 300 }
+	}
 }

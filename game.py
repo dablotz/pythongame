@@ -1,134 +1,158 @@
-""" game.py
-This module contains the main game loop and handles the game state, player, boss, and hazards.
+"""game.py
+Entry point. Initialises pygame, owns the scene state machine, and runs
+the main loop.
+
+The loop itself is intentionally thin:
+  - InputHandler reads raw input once per frame.
+  - Entity update methods interpret that input.
+  - physics.py applies gravity and resolves collisions.
+  - Renderer draws the current scene.
 """
 
 import sys
-import pygame
-from player import Player
+
+import pygame  # pylint: disable=no-member
+
+from assets import Assets
 from boss import BossEnemy
-from hazard import Hazard
-
 from game_state import GameState
-from stick import draw_stick_figure
+from input_handler import InputHandler
+from level import LevelData
+from physics import apply_gravity, resolve_platform_collisions
+from player import Player
+from renderer import Renderer
+from scenes import Scene
+from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE
+from sounds import Sounds
 
-# Initialize Pygame
-pygame.init() # pylint: disable=no-member
+_LEVEL_PATH = "assets/data.json"
 
-# Game settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 1024, 512
-FPS = 60
-GRAVITY = 0.5
-JUMP_STRENGTH = -10
 
-# Colors
-WHITE = (255, 255, 255)
-SKY_BLUE = (135, 206, 235)
-BLACK = (0, 0, 0)
-RED = (200, 0, 0)
-BLUE = (0, 0, 255)
-LIGHT_BLUE = (100, 100, 255)
-PURPLE = (128, 0, 128)
-MAGENTA = (255, 0, 255)
-GREEN = (0, 255, 0)
+def _update_playing(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    player, boss, game_state, level, input_handler, dt
+):
+    """Run one frame of gameplay logic. Returns (player_hp_delta, boss_hp_delta)."""
+    prev_player_hp = game_state.player_health
+    prev_boss_hp = game_state.boss_health
 
-# Set up display
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Mini Platformer")
-clock = pygame.time.Clock()
+    player.update(input_handler, dt)
+    boss.update(dt)
 
-background_img = pygame.image.load("assets/Background.png").convert()
-hazards_img = pygame.image.load("assets/Hazards.png").convert_alpha()
-interactables_img = pygame.image.load("assets/Interactables.png").convert_alpha()
+    apply_gravity(player, dt)
+    player.on_ground = resolve_platform_collisions(player, level.platforms)
 
-# Platforms
-platforms = [
-    pygame.Rect(0, SCREEN_HEIGHT - 40, SCREEN_WIDTH, 40),
-    pygame.Rect(300, 450, 200, 20),
-    pygame.Rect(150, 350, 100, 20),
-]
-
-# Setup
-player = Player()
-player.on_ground = False
-boss = BossEnemy()
-hazards = [Hazard(400, SCREEN_HEIGHT - 60, 40, 20)]
-game_state = GameState()
-
-# Game loop
-RUNNING = True
-while RUNNING:
-    clock.tick(FPS)
-    screen.fill(SKY_BLUE)
-
-    screen.blit(background_img, (0, 0))
-    screen.blit(hazards_img, (0, 0))
-    screen.blit(interactables_img, (0, 0))
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: # pylint: disable=no-member
-            RUNNING = False
-
-    keys = pygame.key.get_pressed()
-    player.update(keys)
-    boss.update()
-
-    # Check collisions with platforms
-    player.on_ground = False
-    for platform in platforms:
-        if player.rect.colliderect(platform) and player.vel_y >= 0:
-            player.rect.bottom = platform.top
-            player.vel_y = 0
-            player.on_ground = True
-
-    # Hazard damage
-    for hazard in hazards:
+    for hazard in level.hazards:
         if player.rect.colliderect(hazard.rect):
             game_state.player_take_damage()
 
-    # Player attack on boss
-    if player.attack_cooldown > 25:
-        if player.attack_rect.colliderect(boss.rect):
-            game_state.boss_take_damage()
+    if player.is_attacking and player.attack_rect.colliderect(boss.rect):
+        game_state.boss_take_damage()
 
-    # Boss attack on player
     if boss.is_attacking and boss.attack_rect.colliderect(player.rect):
         game_state.player_take_damage()
 
-    # Draw platforms
-    for platform in platforms:
-        pygame.draw.rect(screen, (34, 139, 34), platform)
+    return game_state.player_health - prev_player_hp, game_state.boss_health - prev_boss_hp
 
-    # Draw hazards
-    for hazard in hazards:
-        pygame.draw.rect(screen, RED, hazard.rect)
 
-    # Draw player
-    draw_stick_figure(screen, player.rect, BLUE)
-    if player.attack_cooldown > 25:
-        pygame.draw.rect(screen, LIGHT_BLUE, player.attack_rect)
+def _play_frame_sounds(player, player_hp_delta, boss_hp_delta):
+    """Fire sounds for events that happened this frame."""
+    if player.just_jumped:
+        Sounds.play_jump()
+    if player.just_attacked:
+        Sounds.play_attack()
+    if player_hp_delta < 0:
+        Sounds.play_player_hit()
+    if boss_hp_delta < 0:
+        Sounds.play_boss_hit()
 
-    # Draw boss
-    draw_stick_figure(screen, boss.rect, PURPLE)
-    if boss.is_attacking:
-        pygame.draw.rect(screen, MAGENTA, boss.attack_rect)
 
-    # Draw health bars
-    pygame.draw.rect(screen, GREEN, (20, 20, game_state.player_health * 30, 20))
-    pygame.draw.rect(screen, WHITE, (20, 20, 90, 20), 2)
-    pygame.draw.rect(
-        screen, RED, (SCREEN_WIDTH - 150, 20, game_state.boss_health * 30, 20)
-    )
-    pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - 150, 20, 150, 20), 2)
+def _restart(player, boss, game_state):
+    """Reset all game objects for a new run."""
+    player.reset()
+    boss.reset()
+    game_state.reset()
 
-    # End game if over or complete
-    if game_state.game_over:
-        print("Game Over")
-        RUNNING = False
-    elif game_state.level_complete:
-        print("You Win!")
-        RUNNING = False
 
-    pygame.display.flip()
+def main() -> None:  # pylint: disable=too-many-branches,too-many-statements
+    """Initialise pygame and run the game loop."""
+    pygame.init()  # pylint: disable=no-member
+    Sounds.init()
 
-pygame.quit() # pylint: disable=no-member
-sys.exit()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # pylint: disable=no-member
+    pygame.display.set_caption(TITLE)  # pylint: disable=no-member
+    clock = pygame.time.Clock()  # pylint: disable=no-member
+
+    renderer = Renderer(screen)
+    input_handler = InputHandler()
+
+    level = LevelData(_LEVEL_PATH)
+
+    # Pre-load shared assets so the first frame doesn't hitch.
+    Assets.background("assets/Background.png")
+    Assets.image("assets/Hazards.png")
+    Assets.image("assets/Interactables.png")
+
+    player = Player(spawn=level.player_spawn)
+    boss = BossEnemy(spawn=level.boss_spawn)
+    game_state = GameState()
+
+    scene = Scene.TITLE
+    end_sound_played = False
+
+    while True:
+        dt = clock.tick(FPS) / 1000.0
+        input_handler.process()
+
+        if input_handler.quit:
+            break
+
+        # ---- Title scene ------------------------------------------------
+        if scene == Scene.TITLE:
+            renderer.draw_title()
+            if input_handler.jump or input_handler.attack:
+                scene = Scene.PLAYING
+
+        # ---- Playing scene ----------------------------------------------
+        elif scene == Scene.PLAYING:
+            player_hp_delta, boss_hp_delta = _update_playing(
+                player, boss, game_state, level, input_handler, dt
+            )
+            _play_frame_sounds(player, player_hp_delta, boss_hp_delta)
+            renderer.draw_playing(
+                player, boss, game_state, level.platforms, level.hazards
+            )
+
+            if game_state.game_over:
+                scene = Scene.GAME_OVER
+                end_sound_played = False
+            elif game_state.level_complete:
+                scene = Scene.LEVEL_COMPLETE
+                end_sound_played = False
+
+        # ---- End screens ------------------------------------------------
+        elif scene == Scene.GAME_OVER:
+            if not end_sound_played:
+                Sounds.play_game_over()
+                end_sound_played = True
+            renderer.draw_game_over()
+            if input_handler.jump or input_handler.attack:
+                _restart(player, boss, game_state)
+                scene = Scene.PLAYING
+
+        elif scene == Scene.LEVEL_COMPLETE:
+            if not end_sound_played:
+                Sounds.play_victory()
+                end_sound_played = True
+            renderer.draw_level_complete()
+            if input_handler.jump or input_handler.attack:
+                _restart(player, boss, game_state)
+                scene = Scene.PLAYING
+
+        pygame.display.flip()  # pylint: disable=no-member
+
+    pygame.quit()  # pylint: disable=no-member
+    sys.exit()
+
+
+if __name__ == "__main__":
+    main()

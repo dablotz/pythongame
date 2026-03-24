@@ -9,7 +9,8 @@
       "Bash(python -m pytest tests/ -q)",
       "Bash(python -m pylint run.py game/ tests/ --fail-under=10)",
       "Bash(python3 -:*)",
-      "Bash(source .venv/bin/activate)"
+      "Bash(source .venv/bin/activate)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

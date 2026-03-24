@@ -13,9 +13,12 @@ GRAVITY = 1800.0        # acceleration downward
 JUMP_STRENGTH = -600.0  # initial vertical velocity on jump
 PLAYER_SPEED = 300.0    # horizontal movement speed
 
+# Debug
+DEBUG = False
+
 # Colors
 WHITE = (255, 255, 255)
-SKY_BLUE = (135, 206, 235)
+SKY_BLUE = (27, 148, 231)   # matches LDtk bgColor #1B94E7
 BLACK = (0, 0, 0)
 RED = (200, 0, 0)
 BLUE = (0, 0, 255)

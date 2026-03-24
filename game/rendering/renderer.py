@@ -14,6 +14,7 @@ from game.rendering.stick import draw_stick_figure
 from game.core.settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    SKY_BLUE,
     WHITE,
     RED,
     BLUE,
@@ -23,6 +24,7 @@ from game.core.settings import (
     GREEN,
     FOREST_GREEN,
     BLACK,
+    DEBUG,
 )
 
 
@@ -66,18 +68,19 @@ class Renderer:
         hazards: list,
     ) -> None:
         """Main gameplay screen."""
+        # Sky fill (Background.png is transparent above the ground line)
+        self.screen.fill(SKY_BLUE)
         # Background layers from LDtk export
         self.screen.blit(Assets.background("assets/Background.png"), (0, 0))
         self.screen.blit(Assets.image("assets/Hazards.png"), (0, 0))
         self.screen.blit(Assets.image("assets/Interactables.png"), (0, 0))
 
-        # Platforms
-        for platform in platforms:
-            pygame.draw.rect(self.screen, FOREST_GREEN, platform)
-
-        # Hazards
-        for hazard in hazards:
-            pygame.draw.rect(self.screen, RED, hazard.rect)
+        # Platforms / hazards — only visible in debug mode
+        if DEBUG:
+            for platform in platforms:
+                pygame.draw.rect(self.screen, FOREST_GREEN, platform)
+            for hazard in hazards:
+                pygame.draw.rect(self.screen, RED, hazard.rect)
 
         # Player — pass state and facing for animated pose
         draw_stick_figure(

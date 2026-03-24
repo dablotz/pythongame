@@ -42,7 +42,16 @@ def resolve_platform_collisions(
     """
     on_ground = False
     for platform in platforms:
-        if entity.rect.colliderect(platform) and entity.vel_y >= 0:
+        # Only land on the top surface of a platform.
+        # The entity.rect.top < platform.top check ensures we only snap when
+        # the entity is approaching from above — it prevents the standing-on-
+        # the-floor-while-clipping-a-low-ceiling bug where vel_y == 0 would
+        # otherwise teleport the player up to the ledge above them.
+        if (
+            entity.rect.colliderect(platform)
+            and entity.vel_y >= 0
+            and entity.rect.top < platform.top
+        ):
             entity.rect.bottom = platform.top
             entity.vel_y = 0
             on_ground = True

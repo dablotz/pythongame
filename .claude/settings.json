@@ -5,7 +5,11 @@
       "Bash(python -m pylint *.py tests/)",
       "Bash(make venv:*)",
       "Bash(.venv/bin/python -c \"import pygame; print\\(pygame.version.ver\\)\")",
-      "Bash(python -m pylint run.py game/ tests/)"
+      "Bash(python -m pylint run.py game/ tests/)",
+      "Bash(python -m pytest tests/ -q)",
+      "Bash(python -m pylint run.py game/ tests/ --fail-under=10)",
+      "Bash(python3 -:*)",
+      "Bash(source .venv/bin/activate)"
     ]
   }
 }

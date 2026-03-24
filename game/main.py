@@ -34,11 +34,15 @@ def _update_playing(  # pylint: disable=too-many-arguments,too-many-positional-a
     prev_player_hp = game_state.player_health
     prev_boss_hp = game_state.boss_health
 
+    game_state.tick(dt)
     player.update(input_handler, dt)
     boss.update(dt)
 
     apply_gravity(player, dt)
     player.on_ground = resolve_platform_collisions(player, level.platforms)
+
+    apply_gravity(boss, dt)
+    boss.on_ground = resolve_platform_collisions(boss, level.platforms)
 
     for hazard in level.hazards:
         if player.rect.colliderect(hazard.rect):

@@ -13,13 +13,15 @@ _ATTACK_INTERVAL = 1.5
 _ATTACK_DURATION = 0.2
 
 
-class BossEnemy:  # pylint: disable=too-few-public-methods
+class BossEnemy:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """The boss enemy character."""
 
     def __init__(self, spawn: tuple[int, int] = (600, 300)) -> None:
         self._spawn = spawn
         self.rect = pygame.Rect(spawn[0], spawn[1], 60, 60)
         self.health: int = 5
+        self.vel_y: float = 0.0
+        self.on_ground: bool = False
         self.is_attacking: bool = False
         self._interval_timer: float = 0.0
         self._active_timer: float = 0.0
@@ -51,6 +53,8 @@ class BossEnemy:  # pylint: disable=too-few-public-methods
         """Return the boss to spawn position with cleared state."""
         self.rect.topleft = self._spawn
         self.health = 5
+        self.vel_y = 0.0
+        self.on_ground = False
         self.is_attacking = False
         self._interval_timer = 0.0
         self._active_timer = 0.0

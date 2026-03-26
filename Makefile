@@ -17,7 +17,7 @@ install:
 
 lint:
 	@echo "Running linters..."
-	@pylint run.py game/ tests/
+	@pylint main.py run.py game/ tests/
 	@echo "Linting completed."
 
 format:
@@ -37,6 +37,11 @@ test:
 
 # Local: install, then format in-place, lint, and test.
 all: install format lint test
+
+web:
+	@echo "Building web version (output → build/web/)..."
+	@python -m pygbag --build .
+	@echo "Done. Serve locally with: python -m pygbag ."
 
 # CI: install, check formatting without modifying, lint, and test.
 ci: install check-format lint test

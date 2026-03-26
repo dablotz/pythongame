@@ -5,7 +5,9 @@ Launches the game. Run from the project root:
     python -m game
 """
 
+import asyncio
+
 from game.main import main
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

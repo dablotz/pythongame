@@ -10,7 +10,8 @@
       "Bash(python -m pylint run.py game/ tests/ --fail-under=10)",
       "Bash(python3 -:*)",
       "Bash(source .venv/bin/activate)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(python -m pylint main.py run.py game/ tests/ --fail-under=10)"
     ]
   }
 }

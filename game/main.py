@@ -8,7 +8,7 @@ The loop itself is intentionally thin:
   - Renderer draws the current scene.
 """
 
-import sys
+import asyncio
 
 import pygame  # pylint: disable=no-member
 
@@ -76,7 +76,7 @@ def _restart(player, boss, game_state):
     game_state.reset()
 
 
-def main() -> None:  # pylint: disable=too-many-branches,too-many-statements
+async def main() -> None:  # pylint: disable=too-many-branches,too-many-statements
     """Initialise pygame and run the game loop."""
     pygame.init()  # pylint: disable=no-member
     Sounds.init()
@@ -152,6 +152,6 @@ def main() -> None:  # pylint: disable=too-many-branches,too-many-statements
                 scene = Scene.PLAYING
 
         pygame.display.flip()  # pylint: disable=no-member
+        await asyncio.sleep(0)  # yield to browser event loop each frame
 
     pygame.quit()  # pylint: disable=no-member
-    sys.exit()

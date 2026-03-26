@@ -40,8 +40,8 @@ all: install format lint test
 
 web:
 	@echo "Building web version (output → build/web/)..."
-	@python -m pygbag --build .
-	@echo "Done. Serve locally with: python -m pygbag ."
+	@python -m pygbag --build --disable-sound-format-error .
+	@echo "Done. Serve locally with: python -m pygbag --disable-sound-format-error ."
 
 # CI: install, check formatting without modifying, lint, and test.
 ci: install check-format lint test

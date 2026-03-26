@@ -15,10 +15,13 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Build / packaging
+# Build / packaging (includes pygbag web output in build/web/)
 *.egg-info/
 dist/
 build/
 
 # macOS
 .DS_Store
+
+# Claude
+.claude/

@@ -1,5 +1,4 @@
 pygame
-pygbag
 pytest
 pylint
 black

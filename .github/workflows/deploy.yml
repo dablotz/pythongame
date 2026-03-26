@@ -1,29 +1,16 @@
-name: Deploy to GitHub Pages
+name: CI
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # allow manual runs from the Actions tab
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Only one concurrent deployment. Do NOT cancel in-progress runs — a
-# half-finished deployment would leave the live site in a broken state.
-concurrency:
-  group: pages
-  cancel-in-progress: false
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -32,37 +19,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Build web version
-        run: python -m pygbag --build --disable-sound-format-error .
+      - name: Check formatting
+        run: black --check --diff .
 
-      - name: Bundle CDN assets
-        run: |
-          # pygbag's index.html fetches runtime files from an external CDN.
-          # Download every pygame-web CDN URL found in generated files so the
-          # deployment is fully self-contained and doesn't depend on the CDN.
-          CDN_BASE="https://pygame-web.github.io"
-          grep -rhoE "${CDN_BASE}[^\"' ]+" build/web/ | grep -v '/$' | sort -u | while read url; do
-            relative=$(echo "${url#${CDN_BASE}/}" | tr -s '/')
-            target="build/web/${relative}"
-            mkdir -p "$(dirname "${target}")"
-            echo "Downloading ${CDN_BASE}/${relative}"
-            curl -fsSL "${CDN_BASE}/${relative}" -o "${target}"
-          done
-          # Rewrite all references in generated files to use local paths.
-          grep -rl "${CDN_BASE}" build/web/ | xargs sed -i "s|${CDN_BASE}/||g"
+      - name: Lint
+        run: pylint run.py game/ tests/
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/web
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
+      - name: Test
+        run: pytest tests/
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy

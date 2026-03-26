@@ -41,7 +41,7 @@ jobs:
           # Download every pygame-web CDN URL found in generated files so the
           # deployment is fully self-contained and doesn't depend on the CDN.
           CDN_BASE="https://pygame-web.github.io"
-          grep -rhoE "${CDN_BASE}[^\"' ]+" build/web/ | sort -u | while read url; do
+          grep -rhoE "${CDN_BASE}[^\"' ]+" build/web/ | grep -v '/$' | sort -u | while read url; do
             relative="${url#${CDN_BASE}/}"
             target="build/web/${relative}"
             mkdir -p "$(dirname "${target}")"

@@ -42,11 +42,11 @@ jobs:
           # deployment is fully self-contained and doesn't depend on the CDN.
           CDN_BASE="https://pygame-web.github.io"
           grep -rhoE "${CDN_BASE}[^\"' ]+" build/web/ | grep -v '/$' | sort -u | while read url; do
-            relative="${url#${CDN_BASE}/}"
+            relative=$(echo "${url#${CDN_BASE}/}" | tr -s '/')
             target="build/web/${relative}"
             mkdir -p "$(dirname "${target}")"
-            echo "Downloading ${url}"
-            curl -fsSL "${url}" -o "${target}"
+            echo "Downloading ${CDN_BASE}/${relative}"
+            curl -fsSL "${CDN_BASE}/${relative}" -o "${target}"
           done
           # Rewrite all references in generated files to use local paths.
           grep -rl "${CDN_BASE}" build/web/ | xargs sed -i "s|${CDN_BASE}/||g"

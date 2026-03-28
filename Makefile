@@ -2,6 +2,10 @@ VENV_DIR := .venv
 PYTHON    := $(VENV_DIR)/bin/python
 PIP       := $(VENV_DIR)/bin/pip
 
+hooks:
+	@git config core.hooksPath .githooks
+	@echo "Git hooks installed."
+
 venv:
 	@echo "Creating virtual environment in $(VENV_DIR)..."
 	@python3 -m venv $(VENV_DIR)

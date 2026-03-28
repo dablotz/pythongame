@@ -1,0 +1,7 @@
+#!/bin/sh
+# Auto-format any staged Python files with black before committing.
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$')
+if [ -n "$STAGED_PY" ]; then
+    black $STAGED_PY --quiet
+    git add $STAGED_PY
+fi
